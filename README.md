@@ -1,10 +1,13 @@
-# rick_and_morty_api_client
-A simple python client for Rick and Morty API
+#  Client for Rick and Morty API
+> A simple python client for Rick and Morty API
 
+### Requirements:
+- python 3.10+
+- requests
+- aiohttp
 
-There are currently three [available resources](https://rickandmortyapi.com/api
-):
+### How to run:
 
-- Character: used to get all the characters.
-- Location: used to get all the locations.
-- Episode: used to get all the episodes.
+```bash
+python sample.py
+```
