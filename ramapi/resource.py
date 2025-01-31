@@ -1,8 +1,10 @@
 import requests
+
+import asyncio
 import urllib.parse
+from aiohttp import ClientSession
 
 
-# TODO: Replace `requests` with `aiohttp`
 class Resource:
 
     def __init__(self, base_url: str) -> None:
@@ -12,17 +14,27 @@ class Resource:
         result = requests.get(self.url).json()
         return result
 
-    def get_all(self) -> list:
+    async def fetch_all_async(self) -> list:
         page_count = self.get()["info"]["pages"]
-        results = []
-        for page in range(1, page_count + 1):
-            page_data = self.get_page(page)
-            results.extend(page_data["results"])
-        return results
+        async with ClientSession() as session:
+            tasks = [self.fetch_page_async(session, page) for page in range(1, page_count + 1)]
+            pages = await asyncio.gather(*tasks)
+            flattened = [res for data in pages for res in data["results"]]
+            return flattened
 
-    def get_page(self, page: int) -> dict:
+    def fetch_all(self) -> list:
+        return asyncio.run(self.fetch_all_async())
+
+    async def fetch_page_async(self, session: ClientSession, page: int) -> dict:
         target_url = f'{self.url}?page={page}'
-        return requests.get(target_url).json()
+        async with session.get(target_url) as response:
+            return await response.json()
+
+    def fetch_page(self, page: int) -> dict:
+        async def inner():
+            async with ClientSession() as session:
+                return await self.fetch_page_async(session, page)
+        return asyncio.run(inner())
 
     def get_by_ids(self, *ids: list) -> dict:
         if len(ids) == 0:

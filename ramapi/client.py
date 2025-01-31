@@ -25,5 +25,5 @@ class Client:
     def fetch_all_resources(self) -> dict:        
         result = dict()
         for res_name, res in self.resources.items():
-            result[res_name] = res.get_all()
+            result[res_name] = res.fetch_all()
         return result
